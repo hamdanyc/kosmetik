@@ -1,0 +1,80 @@
+cust_name,item,item_price,qty,date_purchase
+John Smith,shampoo,12.99,2,2023-01-02
+Jane Doe,shower gel,7.99,1,2023-01-01
+Michael Johnson,make up cleansing,18.95,3,2023-01-03
+Emily Davis,shampoo,9.99,4,2023-01-04
+David Brown,shower gel,10.49,2,2023-01-05
+Sarah Johnson,make up cleansing,17.50,1,2023-01-05
+Robert Wilson,shampoo,8.99,3,2023-01-06
+Amy Lee,shower gel,6.99,2,2023-01-07
+Emma Carter,make up cleansing,15.99,2,2023-01-08
+James Miller,shampoo,14.50,1,2023-01-09
+Olivia Thompson,shower gel,9.25,4,2023-01-10
+William Anderson,make up cleansing,20.00,1,2023-01-10
+Sophia Martin,shampoo,11.99,2,2023-01-11
+Daniel Walker,shower gel,8.50,3,2023-01-12
+Charlotte Hall,make up cleansing,14.99,3,2023-01-13
+James Wilson,shampoo,13.50,1,2023-01-14
+Grace Wilson,shower gel,7.00,5,2023-01-15
+Liam Carter,make up cleansing,13.75,4,2023-01-16
+Emma Turner,shampoo,10.00,3,2023-01-17
+Lucas Davis,shower gel,8.75,2,2023-01-18
+Sophia Baker,make up cleansing,19.99,1,2023-01-19
+Oliver Martinez,shampoo,11.25,4,2023-01-20
+Ava Rodriguez,shower gel,6.95,3,2023-01-21
+Ethan Smith,make up cleansing,17.50,2,2023-01-22
+Mia Lee,shampoo,9.99,2,2023-01-23
+Noah Taylor,shower gel,7.50,5,2023-01-24
+Emily Hall,make up cleansing,16.49,4,2023-01-25
+Evelyn Clark,shampoo,12.99,3,2023-01-26
+Elijah Anderson,shower gel,8.00,1,2023-01-27
+Harper Turner,make up cleansing,14.99,3,2023-01-28
+Jameson Carter,shampoo,10.50,2,2023-01-29
+Luna Davis,shower gel,7.99,4,2023-01-30
+Charlotte Wilson,make up cleansing,21.00,1,2023-01-31
+Amelia Brown,shampoo,14.25,5,2023-01-02
+Oliver Johnson,shower gel,6.99,2,2023-01-03
+James Lee,make up cleansing,18.75,3,2023-01-04
+Emma Carter,shampoo,8.95,1,2023-01-05
+Noah Miller,shower gel,7.50,2,2023-01-06
+Emma Turner,make up cleansing,19.99,4,2023-01-07
+Olivia Johnson,shampoo,9.50,2,2023-01-08
+Ethan Martinez,shower gel,6.25,3,2023-01-09
+Ava Carter,make up cleansing,16.49,1,2023-01-10
+Lucas Hall,shampoo,15.00,2,2023-01-11
+Sophia Anderson,shower gel,8.50,4,2023-01-12
+Mia Baker,make up cleansing,17.50,2,2023-01-13
+Charlotte Turner,shampoo,9.99,3,2023-01-14
+Jameson Smith,shower gel,7.99,2,2023-01-15
+Harper Lee,make up cleansing,12.99,1,2023-01-16
+Luna Rodriguez,shampoo,8.99,4,2023-01-17
+Evelyn Martin,shower gel,9.50,3,2023-01-18
+Amelia Clark,make up cleansing,15.99,5,2023-01-19
+Elijah Carter,shampoo,10.00,2,2023-01-20
+Charlotte Hall,shower gel,6.95,4,2023-01-21
+Amber Baker,make up cleansing,18.25,3,2023-01-22
+Evelyn Martinez,shampoo,10.99,1,2023-01-23
+Noah Johnson,shower gel,7.99,3,2023-01-24
+Emma Turner,make up cleansing,14.99,2,2023-01-25
+Lyla Lee,shampoo,11.50,1,2023-01-26
+Aiden Carter,shower gel,6.50,4,2023-01-27
+Mila Anderson,make up cleansing,12.75,3,2023-01-28
+Eli Hall,shampoo,10.99,2,2023-01-29
+Grace Wilson,shower gel,8.99,2,2023-01-30
+Luna Baker,make up cleansing,15.49,1,2023-01-22
+Olivia Clark,shampoo,9.99,3,2023-01-12
+Jameson Johnson,shower gel,7.25,5,2023-01-14
+Sophia Turner,make up cleansing,20.00,2,2023-01-17
+Aiden Lee,shampoo,13.50,3,2023-01-18
+Harper Brown,shower gel,6.99,2,2023-01-20
+Lucas Clark,make up cleansing,16.99,4,2023-01-21
+Charlotte Carter,shampoo,8.50,1,2023-01-22
+Eli Wilson,shower gel,7.99,3,2023-01-23
+Mia Hall,make up cleansing,17.99,2,2023-01-24
+Evelyn Martinez,shampoo,10.49,1,2023-01-25
+Amelia Lee,shower gel,8.99,4,2023-01-26
+Elijah Taylor,make up cleansing,15.00,1,2023-01-27
+David Adams,shampoo,9.99,3,2023-01-28
+Sarah Carter,shower gel,6.99,2,2023-01-29
+Michael Hall,make up cleansing,14.25,2,2023-01-30
+Emma Walker,shampoo,12.99,1,2023-01-31
