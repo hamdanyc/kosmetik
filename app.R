@@ -5,7 +5,7 @@ library(dplyr)
 library(mongolite)
 
 # read sales data
-uri <- Sys.getenv("URI-1")
+uri <- Sys.getenv("URI")
 db <- mongo(collection="sales", db="oa", url=uri)
 df <- db$find('{}')
 df_item <- df %>% distinct(item)
