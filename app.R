@@ -2,9 +2,13 @@
 
 library(shiny)
 library(dplyr)
+library(mongolite)
 
 # read sales data
-df <- readr::read_csv("sales.csv")
+uri <- Sys.getenv("URI-1")
+db <- mongo(collection="sales", db="oa", url=uri)
+df <- db$find('{}')
+df_item <- df %>% distinct(item)
 
 # Define UI 
 ui <- fluidPage(
@@ -14,13 +18,12 @@ ui <- fluidPage(
             selectInput(  
                 inputId = "product_choice",
                 label = "Select Product",
-                choices = c("shampoo", "shower gel", "make up cleansing"),
-                selected = "shampoo"
+                choices = df_item,
+                selected = df_item[1]
             ),
         ),
             mainPanel(
-                h2("Total Sales for:"),
-                h3(textOutput("total_amount"))
+                h3(tableOutput("sales"))
             )
     )
 )
@@ -42,6 +45,14 @@ server <- function(input, output) {
                 big.mark = ","
             ))
         currency_format
+    })
+    
+    output$sales <- renderTable({
+        selected <- input$product_choice
+        
+        filtered_data <- df %>% filter(item == selected) %>%
+            mutate(total_sales = item_price * qty) %>%
+            summarise("Sales total" = sum(total_sales), "Quantity" = sum(qty))
     })
 }
 
