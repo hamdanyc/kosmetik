@@ -1,58 +1,87 @@
-# dashboard for kosmetik
+# dashboard for Wawa kosmetik
+# https://abi-posit-wawakosmetik.share.connect.posit.cloud/
 
 library(shiny)
 library(dplyr)
 library(mongolite)
+library(ggplot2)
 
 # read sales data
-uri <- Sys.getenv("URI")
-db <- mongo(collection="sales", db="oa", url=uri)
-df <- db$find('{}')
-df_item <- df %>% distinct(item)
+# uri <- Sys.getenv("URI-1")
+# db <- mongo(collection="sales", db="oa", url=uri)
+# df <- db$find('{}')
+# df_item <- df %>% distinct(item)
 
+dt <- lubridate::today()
 # Define UI 
-ui <- fluidPage(
-    titlePanel("Product Sales Dashboard"),  
-    sidebarLayout(
-        sidebarPanel(
-            selectInput(  
-                inputId = "product_choice",
-                label = "Select Product",
-                choices = df_item,
-                selected = df_item[1]
+ui <- bs4Dash::dashboardPage(
+    title = "Shiny Application",
+    bs4Dash::dashboardHeader(
+        title = "Wawa Roadmap"
+    ),
+    bs4Dash::dashboardSidebar(
+        bs4Dash::sidebarMenu(
+            bs4Dash::menuItem(
+                text = "Transaksi",
+                tabName = "tab_j1p2rgcpnn"
             ),
-        ),
-            mainPanel(
-                h3(tableOutput("sales"))
+            bs4Dash::menuItem(
+                text = "Ringkasan",
+                tabName = "tab_4dhx95c6et"
             )
+        )
+    ),
+    bs4Dash::dashboardBody(
+        bs4Dash::tabItem(
+            tabName = "tab_j1p2rgcpnn",
+            h1(
+                "Transaksi"
+            ),
+            textInput(
+                inputId = "input_dhnrhjc40z",
+                label = "Tarikh",
+                value = dt
+            ),
+            selectInput(
+                inputId = "input_vp6vjageru",
+                label = "Kategori",
+                choices = c("Sales Retail","Sales Agent","Restock", "Lain-lain"),
+                selected = "Sales Retail"
+            ),
+            selectInput(
+                inputId = "input_tqvu7icwb7",
+                label = "Item",
+                choices = c("Sales","Restock FR"),
+                selected = "Sales"
+            ),
+            numericInput(
+                inputId = "input_l7ncx2dtfs",
+                label = "Amaun",
+                value = 300
+            ),
+            actionButton(
+                inputId = "input_y48vyz6564",
+                "Terima!",
+                class = "btn-success"
+            ),
+            tableOutput(
+                outputId = "df"
+            )
+        ),
+        bs4Dash::tabItem(
+            tabName = "tab_4dhx95c6et"
+        )
     )
 )
 
 # server logic
 server <- function(input, output) {
-    output$total_amount <- renderText({
-        selected <- input$product_choice
-        
-        filtered_data <- df %>% filter(item == selected) %>%
-            mutate(total_sales = item_price * qty) %>%
-            summarise(total = sum(total_sales))
-        
-        total <- filtered_data$total
-        currency_format <-
-            paste0("RM", format(
-                round(total, 2),
-                nsmall = 2,
-                big.mark = ","
-            ))
-        currency_format
-    })
-    
-    output$sales <- renderTable({
-        selected <- input$product_choice
-        
-        filtered_data <- df %>% filter(item == selected) %>%
-            mutate(total_sales = item_price * qty) %>%
-            summarise("Sales total" = sum(total_sales), "Quantity" = sum(qty))
+    observeEvent(input$input_y48vyz6564, {
+        output$df <- renderTable({
+            
+            c(input$input_dhnrhjc40z, input$input_vp6vjageru,
+              input$input_tqvu7icwb7, input$input_l7ncx2dtfs)
+        })
     })
 }
 
