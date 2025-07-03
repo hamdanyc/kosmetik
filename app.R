@@ -44,7 +44,7 @@ ui <- dashboardPage(
                 h1(
                     "Transaksi"
                 ),
-                textInput(
+                dateInput(
                     inputId = "input_dhnrhjc40z",
                     label = "Tarikh",
                     value = dt
