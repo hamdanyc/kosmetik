@@ -49,12 +49,6 @@ ui <- dashboardPage(
                     label = "Tarikh",
                     value = dt
                 ),
-                # selectInput(
-                #     inputId = "input_kategori",
-                #     label = "Kategori",
-                #     choices = c("sales retail","sales agent","restock", "misc costs"),
-                #     selected = "sales retail"
-                # ),
                 selectInput(
                     inputId = "input_item",
                     label = "Item",
@@ -102,7 +96,7 @@ ui <- dashboardPage(
                     backgroud = "gray"
                 ),
                 box(
-                    title = "Margin:", textOutput(
+                    title = "Margin: (%)", textOutput(
                         outputId = "output_yr_margin",
                     ),
                     solidHeader = TRUE,
@@ -146,7 +140,7 @@ ui <- dashboardPage(
                     background = "lime"
                 ),
                 box(
-                    title = "Margin:", textOutput(
+                    title = "Margin: (%)", textOutput(
                         outputId = "output_mth_margin"
                     ), 
                     solidHeader = TRUE,
@@ -160,8 +154,8 @@ ui <- dashboardPage(
 # server logic ----
 server <- function(input, output) {
     observeEvent(input$input_y48vyz6564, {
-        tb <- tibble(date = format(input$input_tkh,"%Y-%m-%d"), 
-                item = input$input_item, amount = input$input_amaun)
+        tb <- tibble(date = lubridate::as_date(format(input$input_tkh,"%Y-%m-%d")), 
+                     item = input$input_item, amount = input$input_amaun)
         output$df <- renderTable({
             tb
         })
@@ -187,7 +181,7 @@ server <- function(input, output) {
     output$output_yr_sales <- renderText(total_sales$Total)
     output$output_yr_exp <- renderText(total_exp$Total)
     output$output_yr_net <- renderText(net_profit)
-    output$output_yr_margin <- renderText(net_margin)
+    output$output_yr_margin <- renderText(round(net_margin))
     
     # monthly aggregate
     observeEvent(input$slider_jv8sv5rtdw,{
@@ -208,7 +202,7 @@ server <- function(input, output) {
         output$output_mth_sales <- renderText(mth_sales$Total)
         output$output_mth_exp <- renderText(mth_exp$Total)
         output$output_mth_net <- renderText(mth_net)
-        output$output_mth_margin <- renderText(mth_margin)
+        output$output_mth_margin <- renderText(round(mth_margin))
     })
 }
 
