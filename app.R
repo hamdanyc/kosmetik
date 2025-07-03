@@ -45,24 +45,24 @@ ui <- dashboardPage(
                     "Transaksi"
                 ),
                 dateInput(
-                    inputId = "input_dhnrhjc40z",
+                    inputId = "input_tkh",
                     label = "Tarikh",
                     value = dt
                 ),
                 selectInput(
-                    inputId = "input_vp6vjageru",
+                    inputId = "input_kategori",
                     label = "Kategori",
                     choices = c("sales retail","sales agent","restock", "misc costs"),
                     selected = "sales retail"
                 ),
                 selectInput(
-                    inputId = "input_tqvu7icwb7",
+                    inputId = "input_item",
                     label = "Item",
                     choices = c("sales","restock"),
                     selected = "sales"
                 ),
                 numericInput(
-                    inputId = "input_l7ncx2dtfs",
+                    inputId = "input_amaun",
                     label = "Amaun",
                     value = 300
                 ),
@@ -162,8 +162,8 @@ server <- function(input, output) {
     observeEvent(input$input_y48vyz6564, {
         output$df <- renderTable({
             
-            c(input$input_dhnrhjc40z, input$input_vp6vjageru,
-              input$input_tqvu7icwb7, input$input_l7ncx2dtfs)
+            c(input$input_tkh, input$input_kategori,
+              input$item, input$input_amaun)
         })
     })
     
