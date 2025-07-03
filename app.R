@@ -53,13 +53,13 @@ ui <- dashboardPage(
                     inputId = "input_vp6vjageru",
                     label = "Kategori",
                     choices = c("sales retail","sales agent","restock", "misc costs"),
-                    selected = "Sales Retail"
+                    selected = "sales retail"
                 ),
                 selectInput(
                     inputId = "input_tqvu7icwb7",
                     label = "Item",
-                    choices = c("Sales","Restock FR"),
-                    selected = "Sales"
+                    choices = c("sales","restock"),
+                    selected = "sales"
                 ),
                 numericInput(
                     inputId = "input_l7ncx2dtfs",
