@@ -13,7 +13,7 @@ db <- mongo(collection="sales", db="oa", url=uri)
 df <- db$find('{}')
 
 dt <- lubridate::today()
-dm <- lubridate::month(today())
+dm <- lubridate::month(dt)
 
 # Define UI 
 ui <- dashboardPage(
