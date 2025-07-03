@@ -5,6 +5,7 @@ library(shiny)
 library(dplyr)
 library(mongolite)
 library(ggplot2)
+library(bs4Dash)
 
 # read sales data
 uri <- Sys.getenv("URI")
