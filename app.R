@@ -182,8 +182,8 @@ server <- function(input, output) {
         filter(item == "restock" | item == "misc cost") %>% 
         summarise("Total" = sum(amount))
     
-    net_profit <- total_sales - total_exp
-    net_margin <- net_profit / total_sales * 100
+    net_profit <- total_sales$Total - total_exp$Total
+    net_margin <- net_profit / total_sales$Total * 100
     output$output_yr_sales <- renderText(total_sales$Total)
     output$output_yr_exp <- renderText(total_exp$Total)
     output$output_yr_net <- renderText(net_profit)
