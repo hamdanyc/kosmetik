@@ -15,7 +15,7 @@ df <- db$find('{}')
 dt <- lubridate::today()
 dm <- lubridate::month(dt)
 
-# Define UI 
+# Define ui ----
 ui <- dashboardPage(
     title = "Shiny Application",
     dashboardHeader(
@@ -49,16 +49,16 @@ ui <- dashboardPage(
                     label = "Tarikh",
                     value = dt
                 ),
-                selectInput(
-                    inputId = "input_kategori",
-                    label = "Kategori",
-                    choices = c("sales retail","sales agent","restock", "misc costs"),
-                    selected = "sales retail"
-                ),
+                # selectInput(
+                #     inputId = "input_kategori",
+                #     label = "Kategori",
+                #     choices = c("sales retail","sales agent","restock", "misc costs"),
+                #     selected = "sales retail"
+                # ),
                 selectInput(
                     inputId = "input_item",
                     label = "Item",
-                    choices = c("sales","restock"),
+                    choices = c("sales","restock","misc cost"),
                     selected = "sales"
                 ),
                 numericInput(
@@ -157,14 +157,20 @@ ui <- dashboardPage(
     )
 )
 
-# server logic
+# server logic ----
 server <- function(input, output) {
     observeEvent(input$input_y48vyz6564, {
+        tb <- tibble(date = format(input$input_tkh,"%Y-%m-%d"), 
+                item = input$input_item, amount = input$input_amaun)
         output$df <- renderTable({
-            
-            c(input$input_tkh, input$input_kategori,
-              input$item, input$input_amaun)
+            tb
         })
+        # insert database
+        db$insert(tb)
+        showModal(modalDialog(
+            title = "Notis",
+            "Maklumat telah dikemaskini!"
+        ))
     })
     
     # Calculate total Sales - Exp
