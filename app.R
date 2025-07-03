@@ -175,7 +175,7 @@ server <- function(input, output) {
     
     # Calculate total Sales - Exp
     total_sales <- df %>% 
-        filter(item == "sales retail") %>% 
+        filter(item == "sales") %>% 
         summarise("Total sale" = sum(amount)) %>% unlist()
     
     total_exp <- df %>% 
@@ -194,13 +194,13 @@ server <- function(input, output) {
         mth_sales <- df %>% 
             group_by(lubridate::month(date)) %>% 
             filter(lubridate::month(date) == input$slider_jv8sv5rtdw) %>% 
-            filter(item == "sales retail" | item == "sales agent") %>% 
+            filter(item == "sales") %>% 
             summarise("Total" = sum(amount))
         
         mth_exp <- df %>% 
             group_by(lubridate::month(date)) %>% 
             filter(lubridate::month(date) == input$slider_jv8sv5rtdw) %>% 
-            filter(item == "restock RF" | item == "misc cost") %>% 
+            filter(item == "restock" | item == "misc cost") %>% 
             summarise("Total" = sum(amount))
         
         mth_net <- mth_sales$Total - mth_exp$Total
