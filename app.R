@@ -175,11 +175,11 @@ server <- function(input, output) {
     
     # Calculate total Sales - Exp
     total_sales <- df %>% 
-        filter(item == "sales retail" | item == "sales agent") %>% 
+        filter(item == "sales retail") %>% 
         summarise("Total sale" = sum(amount)) %>% unlist()
     
     total_exp <- df %>% 
-        filter(item == "restock RF" | item == "misc cost") %>% 
+        filter(item == "restock" | item == "misc cost") %>% 
         summarise("Total sale" = sum(amount)) %>% unlist()
     
     net_profit <- total_sales - total_exp
