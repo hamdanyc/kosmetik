@@ -176,16 +176,16 @@ server <- function(input, output) {
     # Calculate total Sales - Exp
     total_sales <- df %>% 
         filter(item == "sales") %>% 
-        summarise("Total sale" = sum(amount)) %>% unlist()
+        summarise("Total" = sum(amount)) 
     
     total_exp <- df %>% 
         filter(item == "restock" | item == "misc cost") %>% 
-        summarise("Total sale" = sum(amount)) %>% unlist()
+        summarise("Total" = sum(amount))
     
     net_profit <- total_sales - total_exp
     net_margin <- net_profit / total_sales * 100
-    output$output_yr_sales <- renderText(total_sales)
-    output$output_yr_exp <- renderText(total_exp)
+    output$output_yr_sales <- renderText(total_sales$Total)
+    output$output_yr_exp <- renderText(total_exp$Total)
     output$output_yr_net <- renderText(net_profit)
     output$output_yr_margin <- renderText(net_margin)
     
