@@ -13,6 +13,8 @@ db <- mongo(collection="sales", db="oa", url=uri)
 df <- db$find('{}')
 
 dt <- lubridate::today()
+dm <- lubridate::month(today())
+
 # Define UI 
 ui <- dashboardPage(
     title = "Shiny Application",
@@ -78,29 +80,33 @@ ui <- dashboardPage(
                 h1(
                     "Ringkasan Tahun 2025"
                 ),
-                tags$p(
-                    "Jualan:"
+                box(
+                    title = "Jualan:", textOutput(
+                        outputId = "output_yr_sales",
+                    ),
+                    solidHeader = TRUE,
+                    background = "indigo"
                 ),
-                textOutput(
-                    outputId = "output_yr_sales"
+                box(
+                    title = "Perbelanjaan:", textOutput(
+                        outputId = "output_yr_exp",
+                    ),
+                    solidHeader = TRUE,
+                    background = "info"
                 ),
-                tags$p(
-                    "Perbelanjaan:"
+                box(
+                    title = "Pendapatan:", textOutput(
+                        outputId = "output_yr_net",
+                    ),
+                    solidHeader = TRUE,
+                    backgroud = "gray"
                 ),
-                textOutput(
-                    outputId = "output_yr_exp"
-                ),
-                tags$p(
-                    "Pendapatan:"
-                ),
-                textOutput(
-                    outputId = "output_yr_net"
-                ),
-                tags$p(
-                    "Margin:"
-                ),
-                textOutput(
-                    outputId = "output_yr_margin"
+                box(
+                    title = "Margin:", textOutput(
+                        outputId = "output_yr_margin",
+                    ),
+                    solidHeader = TRUE,
+                    background = "warning"
                 ),
                 plotOutput(
                     outputId = "output_waybzvxb4v"
@@ -116,31 +122,35 @@ ui <- dashboardPage(
                     label = "Bulan",
                     min = 0,
                     max = 12,
-                    value = 0
+                    value = dm
                 ),
-                tags$p(
-                    "Jualan:"
+                box(
+                    title = "Jualan:", textOutput(
+                        outputId = "output_mth_sales"
+                    ),
+                    solidHeader = TRUE,
+                    background = "primary"
                 ),
-                textOutput(
-                    outputId = "output_mth_sales"
+                box(
+                    title = "Perbelanjaan:", textOutput(
+                        outputId = "output_mth_exp"
+                    ),
+                    solidHeader = TRUE,
+                    background = "maroon"
                 ),
-                tags$p(
-                    "Perbelanjaan:"
+                box(
+                    title = "Pendapatan:", textOutput(
+                        outputId = "output_mth_net"
+                    ),
+                    solidHeader = TRUE,
+                    background = "lime"
                 ),
-                textOutput(
-                    outputId = "output_mth_exp"
-                ),
-                tags$p(
-                    "Pendapatan:"
-                ),
-                textOutput(
-                    outputId = "output_mth_net"
-                ),
-                tags$p(
-                    "Margin:"
-                ),
-                textOutput(
-                    outputId = "output_mth_margin"
+                box(
+                    title = "Margin:", textOutput(
+                        outputId = "output_mth_margin"
+                    ), 
+                    solidHeader = TRUE,
+                    background = "warning"
                 )
             )
         )
