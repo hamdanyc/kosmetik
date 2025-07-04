@@ -1,11 +1,13 @@
 # dashboard for Wawa kosmetik
 # https://abi-posit-wawakosmetik.share.connect.posit.cloud/
+# rsconnect::writeManifest()
 
 library(shiny)
 library(dplyr)
 library(mongolite)
 library(ggplot2)
 library(bs4Dash)
+library(DT)
 
 # read sales data
 uri <- Sys.getenv("URI")
@@ -25,22 +27,26 @@ ui <- dashboardPage(
         sidebarMenu(
             menuItem(
                 text = "Transaksi",
-                tabName = "tab_j1p2rgcpnn"
+                tabName = "tb_trans"
             ),
             menuItem(
                 text = "Ringkasan Tahunan",
-                tabName = "tab_inr00usq8d"
+                tabName = "tab_thn"
             ),
             menuItem(
                 text = "Ringkasan Bulanan",
-                tabName = "tab_ijylm47bld"
+                tabName = "tab_bln"
+            ),
+            menuItem(
+                text = "Kemaskini Bulanan",
+                tabName = "tab_edtbln"
             )
         )
     ),
     dashboardBody(
         tabItems(
             tabItem(
-                tabName = "tab_j1p2rgcpnn",
+                tabName = "tb_trans",
                 h1(
                     "Transaksi"
                 ),
@@ -70,7 +76,7 @@ ui <- dashboardPage(
                 )
             ),
             tabItem(
-                tabName = "tab_inr00usq8d",
+                tabName = "tab_thn",
                 h1(
                     "Ringkasan Tahun 2025"
                 ),
@@ -107,7 +113,7 @@ ui <- dashboardPage(
                 )
             ),
             tabItem(
-                tabName = "tab_ijylm47bld",
+                tabName = "tab_bln",
                 h1(
                     "Ringkasan Mengikut Bulan"
                 ),
@@ -146,6 +152,20 @@ ui <- dashboardPage(
                     solidHeader = TRUE,
                     background = "warning"
                 )
+            ),
+            tabItem(
+                tabName = "tab_edtbln",
+                h1(
+                    "Verifikasi | Kemaskini Mengikut Bulan"
+                ),
+                sliderInput(
+                    inputId = "slider_tbmth",
+                    label = "Bulan",
+                    min = 0,
+                    max = 12,
+                    value = dm
+                ),
+                DT::dataTableOutput('tbmth')
             )
         )
     )
@@ -203,6 +223,18 @@ server <- function(input, output) {
         output$output_mth_exp <- renderText(mth_exp$Total)
         output$output_mth_net <- renderText(mth_net)
         output$output_mth_margin <- renderText(round(mth_margin))
+    })
+    
+    # View | edit month transaction
+    observeEvent(input$slider_tbmth,{
+        output$tbmth <- DT::renderDataTable({
+            td <- df %>% filter(lubridate::month(date) == input$slider_tbmth)
+            datatable(td, editable = "row", options = list(
+                dom = 'Bfrtip',
+                buttons = c('create', 'edit', 'remove'),
+                fixedHeader = TRUE
+            ))
+        })
     })
 }
 
