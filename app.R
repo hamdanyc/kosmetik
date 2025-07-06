@@ -258,7 +258,7 @@ server <- function(input, output) {
             
             if (nrow(td) > 0) {
             datatable(td, rownames = FALSE, editable = list(
-                target = 'row', disable = list(columns = c(1,4))),
+                target = 'row', disable = list(columns = c(0,3))),
                 options = list(dom = 'Bfrtip',
                                buttons = c('create', 'edit', 'remove'),
                                fixedHeader = TRUE
