@@ -255,12 +255,20 @@ server <- function(input, output) {
             
             # Query db with aggregate
             td <- db$aggregate(pipe = pipe)
-            datatable(td, editable = list(
+            
+            if (nrow(td) > 0) {
+            datatable(td, rownames = FALSE, editable = list(
                 target = 'row', disable = list(columns = c(0,1,4))),
                 options = list(dom = 'Bfrtip',
                                buttons = c('create', 'edit', 'remove'),
                                fixedHeader = TRUE
                 ))
+            } else{
+                showModal(modalDialog(
+                    title = "Maaf",
+                    "Tiada Maklumat diketemukan!"
+                ))
+            }
         })
     })
 }
