@@ -8,6 +8,7 @@ library(mongolite)
 library(ggplot2)
 library(bs4Dash)
 library(DT)
+library(jsonlite)
 
 # read sales data
 uri <- Sys.getenv("URI")
@@ -38,7 +39,7 @@ ui <- dashboardPage(
                 tabName = "tab_bln"
             ),
             menuItem(
-                text = "Kemaskini Bulanan",
+                text = "Kemaskini Transaksi | Bulanan",
                 tabName = "tab_edtbln"
             )
         )
@@ -118,7 +119,7 @@ ui <- dashboardPage(
                     "Ringkasan Mengikut Bulan"
                 ),
                 sliderInput(
-                    inputId = "slider_jv8sv5rtdw",
+                    inputId = "slider_mth",
                     label = "Bulan",
                     min = 0,
                     max = 12,
@@ -180,7 +181,7 @@ server <- function(input, output) {
             tb
         })
         # insert database
-        db$insert(tb)
+        # db$insert(tb)
         showModal(modalDialog(
             title = "Notis",
             "Maklumat telah dikemaskini!"
@@ -188,6 +189,7 @@ server <- function(input, output) {
     })
     
     # Calculate total Sales - Exp
+    df <- db$find('{}')
     total_sales <- df %>% 
         filter(item == "sales") %>% 
         summarise("Total" = sum(amount)) 
@@ -204,36 +206,61 @@ server <- function(input, output) {
     output$output_yr_margin <- renderText(round(net_margin))
     
     # monthly aggregate
-    observeEvent(input$slider_jv8sv5rtdw,{
-        mth_sales <- df %>% 
-            group_by(lubridate::month(date)) %>% 
-            filter(lubridate::month(date) == input$slider_jv8sv5rtdw) %>% 
-            filter(item == "sales") %>% 
-            summarise("Total" = sum(amount))
+    observeEvent(input$slider_mth,{
+        # pipe <- '[{ $project: {date: 1, item: 1, amount: 1, mth: {$month: "$date" }}}, {$match:{ mth: 6}}]'
         
-        mth_exp <- df %>% 
-            group_by(lubridate::month(date)) %>% 
-            filter(lubridate::month(date) == input$slider_jv8sv5rtdw) %>% 
-            filter(item == "restock" | item == "misc cost") %>% 
-            summarise("Total" = sum(amount))
+        pipe_list <- list(
+            list('$project' = list(date = 1, item = 1, amount = 1, mth = list('$month' = '$date'))),
+            list('$match' = list(mth = input$slider_mth))
+        )
+        pipe <- toJSON(pipe_list, auto_unbox = TRUE)
         
-        mth_net <- mth_sales$Total - mth_exp$Total
-        mth_margin <- mth_net / mth_sales$Total * 100
-        output$output_mth_sales <- renderText(mth_sales$Total)
-        output$output_mth_exp <- renderText(mth_exp$Total)
-        output$output_mth_net <- renderText(mth_net)
-        output$output_mth_margin <- renderText(round(mth_margin))
+        # Query db with aggregate
+        td <- db$aggregate(pipe = pipe)
+        
+        if (nrow(td) > 0) {
+            
+            mth_sales <- td %>% 
+                filter(item == "sales") %>% 
+                summarise("Total" = sum(amount))
+            
+            mth_exp <- td %>% 
+                filter(item == "restock" | item == "misc cost") %>% 
+                summarise("Total" = sum(amount))
+            
+            mth_net <- mth_sales$Total - mth_exp$Total
+            mth_margin <- mth_net / mth_sales$Total * 100
+            
+            output$output_mth_sales <- renderText(mth_sales$Total)
+            output$output_mth_exp <- renderText(mth_exp$Total)
+            output$output_mth_net <- renderText(mth_net)
+            output$output_mth_margin <- renderText(round(mth_margin))
+        } else {
+            output$output_mth_sales <- renderText("")
+            output$output_mth_exp <- renderText("")
+            output$output_mth_net <- renderText("")
+            output$output_mth_margin <- renderText("")
+        }
     })
     
-    # View | edit month transaction
+    # View | edit transaction
     observeEvent(input$slider_tbmth,{
         output$tbmth <- DT::renderDataTable({
-            td <- df %>% filter(lubridate::month(date) == input$slider_tbmth)
-            datatable(td, editable = "row", options = list(
-                dom = 'Bfrtip',
-                buttons = c('create', 'edit', 'remove'),
-                fixedHeader = TRUE
-            ))
+            # pipe <- '[{ $project: {_id: 0, date: 1, item: 1, amount: 1, mth: {$month: "$date" }}}, {$match:{ mth: 6}}]'
+            pipe_list <- list(
+                list('$project' = list("_id" = 0, date = 1, item = 1, amount = 1, mth = list('$month' = '$date'))),
+                list('$match' = list(mth = input$slider_tbmth))
+            )
+            pipe <- toJSON(pipe_list, auto_unbox = TRUE)
+            
+            # Query db with aggregate
+            db$aggregate(pipe = pipe)
+            datatable(td, editable = list(
+                target = 'row', disable = list(columns = c(0,1,4))),
+                options = list(dom = 'Bfrtip',
+                               buttons = c('create', 'edit', 'remove'),
+                               fixedHeader = TRUE
+                ))
         })
     })
 }
