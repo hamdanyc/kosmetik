@@ -254,7 +254,7 @@ server <- function(input, output) {
             pipe <- toJSON(pipe_list, auto_unbox = TRUE)
             
             # Query db with aggregate
-            db$aggregate(pipe = pipe)
+            td <- db$aggregate(pipe = pipe)
             datatable(td, editable = list(
                 target = 'row', disable = list(columns = c(0,1,4))),
                 options = list(dom = 'Bfrtip',
