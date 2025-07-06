@@ -257,7 +257,7 @@ server <- function(input, output) {
             td <- db$aggregate(pipe = pipe)
             
             if (nrow(td) > 0) {
-            datatable(td, rownames = FALSE, editable = list(
+            datatable(td[,-4], rownames = FALSE, editable = list(
                 target = 'row', disable = list(columns = c(0,3))),
                 options = list(dom = 'Bfrtip',
                                buttons = c('create', 'edit', 'remove'),
