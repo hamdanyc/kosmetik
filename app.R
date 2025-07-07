@@ -1,6 +1,6 @@
 # dashboard for Wawa kosmetik
 # https://abi-posit-wawakosmetik.share.connect.posit.cloud/
-# rsconnect::writeManifest()
+# rsconnect::wrtypeanifest()
 
 library(shiny)
 library(dplyr)
@@ -12,11 +12,14 @@ library(jsonlite)
 
 # read sales data
 uri <- Sys.getenv("URI")
-db <- mongo(collection="sales", db="oa", url=uri)
-df <- db$find('{}')
-
+colSales <- mongo(collection="sales", db="oa", url=uri)
+colItem <- mongo(collection="items", db="oa", url=uri)
 dt <- lubridate::today()
 dm <- lubridate::month(dt)
+
+# Init values
+items_lst <- c("Basic set", "Travel combo", "Hair tonic", "Hair serum")
+price_lst <- c(175, 215, 78, 75)
 
 # Define ui ----
 ui <- dashboardPage(
@@ -27,8 +30,12 @@ ui <- dashboardPage(
     dashboardSidebar(
         sidebarMenu(
             menuItem(
-                text = "Transaksi",
+                text = "Transaksi Jualan | Belian",
                 tabName = "tb_trans"
+            ),
+            menuItem(
+                text = "Jadual Item",
+                tabName = "tb_items"
             ),
             menuItem(
                 text = "Ringkasan Tahunan",
@@ -41,6 +48,10 @@ ui <- dashboardPage(
             menuItem(
                 text = "Kemaskini Transaksi | Bulanan",
                 tabName = "tab_edtbln"
+            ),
+            menuItem(
+                text = "Transaksi Item | Bulanan",
+                tabName = "tab_itembln"
             )
         )
     ),
@@ -57,10 +68,26 @@ ui <- dashboardPage(
                     value = dt
                 ),
                 selectInput(
-                    inputId = "input_item",
-                    label = "Item",
+                    inputId = "input_type",
+                    label = "Jenis",
                     choices = c("sales","restock","misc cost"),
                     selected = "sales"
+                ),
+                selectInput(
+                    inputId = "input_item",
+                    label = "Produk",
+                    choices = items_lst,
+                    selected = items_lst[1]
+                ),
+                numericInput(
+                    inputId = "input_unit",
+                    label = "Unit",
+                    value = 3
+                ),
+                numericInput(
+                    inputId = "input_price",
+                    label = "Harga",
+                    value = 100
                 ),
                 numericInput(
                     inputId = "input_amaun",
@@ -68,12 +95,35 @@ ui <- dashboardPage(
                     value = 300
                 ),
                 actionButton(
-                    inputId = "input_y48vyz6564",
+                    inputId = "btn_trans",
                     "Terima!",
                     class = "btn-success"
                 ),
                 tableOutput(
                     outputId = "df"
+                )
+            ),
+            tabItem(
+                tabName = "tb_items",
+                h1(
+                    "Jadual item"
+                ),
+                textInput(
+                    inputId = "input_item",
+                    label = "Nama produk"
+                ),
+                numericInput(
+                    inputId = "input_price",
+                    label = "Harga",
+                    value = 3
+                ),
+                actionButton(
+                    inputId = "btn_item",
+                    "Terima!",
+                    class = "btn-success"
+                ),
+                tableOutput(
+                    outputId = "items"
                 )
             ),
             tabItem(
@@ -89,7 +139,7 @@ ui <- dashboardPage(
                     background = "indigo"
                 ),
                 box(
-                    title = "Perbelanjaan:", textOutput(
+                    title = "Belian:", textOutput(
                         outputId = "output_yr_exp",
                     ),
                     solidHeader = TRUE,
@@ -108,9 +158,6 @@ ui <- dashboardPage(
                     ),
                     solidHeader = TRUE,
                     background = "warning"
-                ),
-                plotOutput(
-                    outputId = "output_waybzvxb4v"
                 )
             ),
             tabItem(
@@ -133,7 +180,7 @@ ui <- dashboardPage(
                     background = "primary"
                 ),
                 box(
-                    title = "Perbelanjaan:", textOutput(
+                    title = "Belian:", textOutput(
                         outputId = "output_mth_exp"
                     ),
                     solidHeader = TRUE,
@@ -157,7 +204,7 @@ ui <- dashboardPage(
             tabItem(
                 tabName = "tab_edtbln",
                 h1(
-                    "Verifikasi | Kemaskini Mengikut Bulan"
+                    "Verifikasi | Kemaskini Transaksi (Bulanan)"
                 ),
                 sliderInput(
                     inputId = "slider_tbmth",
@@ -167,6 +214,20 @@ ui <- dashboardPage(
                     value = dm
                 ),
                 DT::dataTableOutput('tbmth')
+            ),
+            tabItem(
+                tabName = "tab_itembln",
+                h1(
+                    "Verifikasi | Kemaskini Item (Bulanan)"
+                ),
+                sliderInput(
+                    inputId = "slider_tbitem",
+                    label = "Bulan",
+                    min = 0,
+                    max = 12,
+                    value = dm
+                ),
+                DT::dataTableOutput('tbitem')
             )
         )
     )
@@ -174,14 +235,32 @@ ui <- dashboardPage(
 
 # server logic ----
 server <- function(input, output) {
-    observeEvent(input$input_y48vyz6564, {
-        tb <- tibble(date = lubridate::as_date(format(input$input_tkh,"%Y-%m-%d")), 
-                     item = input$input_item, amount = input$input_amaun)
+    observeEvent(input$btn_trans, {
+        # assign values
+        amount = input$input_unit * input$input_price
+        
+        tb <- tibble(date = lubridate::as_datetime(format(input$input_tkh,"%Y-%m-%d")), 
+                     type = input$input_type, item = input$input_item, unit = input$input_unit, amount = input$input_amaun)
         output$df <- renderTable({
             tb
         })
+        
         # insert database
-        # db$insert(tb)
+        colSales$insert(tb)
+        showModal(modalDialog(
+            title = "Notis",
+            "Maklumat telah dikemaskini!"
+        ))
+    })
+    
+    observeEvent(input$btn_item, {
+        tb <- tibble(item = input$input_item, price = input$input_price)
+        output$df <- renderTable({
+            tb
+        })
+
+        # insert database
+        colItem$insert(tb)
         showModal(modalDialog(
             title = "Notis",
             "Maklumat telah dikemaskini!"
@@ -189,13 +268,13 @@ server <- function(input, output) {
     })
     
     # Calculate total Sales - Exp
-    df <- db$find('{}')
+    df <- colSales$find('{}')
     total_sales <- df %>% 
-        filter(item == "sales") %>% 
+        filter(type == "sales") %>% 
         summarise("Total" = sum(amount)) 
     
     total_exp <- df %>% 
-        filter(item == "restock" | item == "misc cost") %>% 
+        filter(type == "restock" | type == "misc cost") %>% 
         summarise("Total" = sum(amount))
     
     net_profit <- total_sales$Total - total_exp$Total
@@ -207,25 +286,25 @@ server <- function(input, output) {
     
     # monthly aggregate
     observeEvent(input$slider_mth,{
-        # pipe <- '[{ $project: {date: 1, item: 1, amount: 1, mth: {$month: "$date" }}}, {$match:{ mth: 6}}]'
+        # pipe <- '[{ $project: {date: 1, type: 1, amount: 1, mth: {$month: "$date" }}}, {$match:{ mth: 6}}]'
         
         pipe_list <- list(
-            list('$project' = list(date = 1, item = 1, amount = 1, mth = list('$month' = '$date'))),
+            list('$project' = list(date = 1, type = 1, amount = 1, mth = list('$month' = '$date'))),
             list('$match' = list(mth = input$slider_mth))
         )
         pipe <- toJSON(pipe_list, auto_unbox = TRUE)
         
         # Query db with aggregate
-        td <- db$aggregate(pipe = pipe)
+        td <- colSales$aggregate(pipe = pipe)
         
         if (nrow(td) > 0) {
             
             mth_sales <- td %>% 
-                filter(item == "sales") %>% 
+                filter(type == "sales") %>% 
                 summarise("Total" = sum(amount))
             
             mth_exp <- td %>% 
-                filter(item == "restock" | item == "misc cost") %>% 
+                filter(type == "restock" | type == "misc cost") %>% 
                 summarise("Total" = sum(amount))
             
             mth_net <- mth_sales$Total - mth_exp$Total
@@ -246,15 +325,15 @@ server <- function(input, output) {
     # View | edit transaction
     observeEvent(input$slider_tbmth,{
         output$tbmth <- DT::renderDataTable({
-            # pipe <- '[{ $project: {_id: 0, date: 1, item: 1, amount: 1, mth: {$month: "$date" }}}, {$match:{ mth: 6}}]'
+            # pipe <- '[{ $project: {_id: 0, date: 1, type: 1, amount: 1, mth: {$month: "$date" }}}, {$match:{ mth: 6}}]'
             pipe_list <- list(
-                list('$project' = list("_id" = 0, date = 1, item = 1, amount = 1, mth = list('$month' = '$date'))),
+                list('$project' = list("_id" = 0, date = 1, type = 1, amount = 1, mth = list('$month' = '$date'))),
                 list('$match' = list(mth = input$slider_tbmth))
             )
             pipe <- toJSON(pipe_list, auto_unbox = TRUE)
             
             # Query db with aggregate
-            td <- db$aggregate(pipe = pipe)
+            td <- colSales$aggregate(pipe = pipe)
             
             if (nrow(td) > 0) {
             datatable(td[,-4], rownames = FALSE, editable = list(
@@ -263,6 +342,36 @@ server <- function(input, output) {
                                buttons = c('create', 'edit', 'remove'),
                                fixedHeader = TRUE
                 ))
+            } else{
+                showModal(modalDialog(
+                    title = "Maaf",
+                    "Tiada Maklumat diketemukan!"
+                ))
+            }
+        })
+    })
+    
+    # View | Items transaction
+    observeEvent(input$slider_tbitem,{
+        output$tbitem <- DT::renderDataTable({
+            # pipe <- '[{ $project: {_id: 0, date: 1, type: 1, amount: 1, mth: {$month: "$date" }}}, {$match:{ mth: 6}}]'
+            pipe_list <- list(
+                list('$project' = list("_id" = 0, date = 1, type = 1, item = 1, unit = 1, amount = 1, mth = list('$month' = '$date'))),
+                list('$match' = list(mth = input$slider_tbitem))
+            )
+            pipe <- toJSON(pipe_list, auto_unbox = TRUE)
+            
+            # Query db with aggregate
+            td <- colSales$aggregate(pipe = pipe) %>% 
+                select(date, type, item, unit, amount)
+            
+            if (nrow(td) > 0) {
+                datatable(td, rownames = FALSE, editable = list(
+                    target = 'row', disable = list(columns = c(0,3))),
+                    options = list(dom = 'Bfrtip',
+                                   buttons = c('create', 'edit', 'remove'),
+                                   fixedHeader = TRUE
+                    ))
             } else{
                 showModal(modalDialog(
                     title = "Maaf",
