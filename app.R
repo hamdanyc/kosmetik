@@ -11,6 +11,7 @@ library(DT)
 library(jsonlite)
 
 # read sales data ----
+uri <- Sys.getenv("URI-1")
 colSales <- mongo(collection="sales", db="oa", url=uri)
 colItem <- mongo(collection="items", db="oa", url=uri)
 dt <- lubridate::today()
@@ -270,7 +271,7 @@ server <- function(input, output, session) {
     observeEvent(input$input_price,{
                 price <- res$price
         # update variable
-        updateNumericInput(session, "input_price", value = price())
+        # updateNumericInput(session, "input_price", value = price())
         updateNumericInput(session, "input_amaun", value = amount())
     })
 
