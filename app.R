@@ -11,7 +11,6 @@ library(DT)
 library(jsonlite)
 
 # read sales data ----
-uri <- Sys.getenv("URI")
 colSales <- mongo(collection="sales", db="oa", url=uri)
 colItem <- mongo(collection="items", db="oa", url=uri)
 dt <- lubridate::today()
