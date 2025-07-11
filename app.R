@@ -18,11 +18,16 @@ dt <- lubridate::today()
 dm <- lubridate::month(dt)
 
 # Init values
-items_lst <- c("Basic set", "Travel combo", "Hair tonic", "Hair serum")
-price_lst <- c(175, 215, 78, 75)
 res <- (colItem$find('{}', fields = '{"_id": 0, "item": 1, "price": 1}')) %>% 
-    tibble()
+    as_tibble()
 
+# func price
+price <- function(item){
+    qry <- toJSON(list(item = item, auto_unbox = TRUE))
+    pc <- colItem$find(qry, fields = '{"_id": 0, "price": 1}') %>% unlist()
+    return(pc)
+}
+    
 # Define ui ----
 ui <- dashboardPage(
     title = "Shiny Application",
@@ -88,7 +93,7 @@ ui <- dashboardPage(
                 numericInput(
                     inputId = "input_price",
                     label = "Harga",
-                    value = res$price[1]
+                    value = colItem$find('{"item": "Basic set"}', fields='{"_id":0,"price":1}')
                 ),
                 numericInput(
                     inputId = "input_amaun",
@@ -251,15 +256,10 @@ server <- function(input, output, session) {
         ))
     })
     
-    output$price <- renderText({
-        res %>% filter(item == input$input_item) %>% unlist()
-    })
-    
-    price <- reactive({
-        req(input$input_item)
-        # colItem$find('{}', fields = '{"_id": 0, "item": 1, "price": 1}')
-        res %>% filter(item == input$input_item) %>% as_tibble()
-        res$price
+    price <- output$price <- renderText({
+        qry <- toJSON(list(item = input$input_item), auto_unbox = TRUE)
+        colItem$find(qry, fields = '{"_id": 0, "price": 1}') %>% unlist()
+        # colItem$find('{"item": input$input_item}', fields='{"_id":0,"price":1}') %>% unlist()
     })
     
     amount <- reactive({
@@ -268,8 +268,14 @@ server <- function(input, output, session) {
         input$input_unit * input$input_price
     })
     
+    observeEvent(input$input_item,{
+        price <- res$price
+        # update variable
+        updateNumericInput(session, "input_price", value = price())
+    })
+    
     observeEvent(input$input_price,{
-                price <- res$price
+        price <- res$price
         # update variable
         # updateNumericInput(session, "input_price", value = price())
         updateNumericInput(session, "input_amaun", value = amount())
