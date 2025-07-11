@@ -100,7 +100,7 @@ ui <- dashboardPage(
                     label = "Amaun",
                     value = 300
                 ),
-                textOutput("price"),
+                # textOutput("price"), not run 
                 actionButton(
                     inputId = "btn_trans",
                     "Terima!",
