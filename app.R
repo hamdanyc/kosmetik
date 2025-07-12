@@ -11,7 +11,7 @@ library(DT)
 library(jsonlite)
 
 # read sales data ----
-uri <- Sys.getenv("URI")
+uri <- Sys.getenv("URI-1")
 colSales <- mongo(collection="sales", db="oa", url=uri)
 colItem <- mongo(collection="items", db="oa", url=uri)
 dt <- lubridate::today()
@@ -98,7 +98,7 @@ ui <- dashboardPage(
                 numericInput(
                     inputId = "input_amaun",
                     label = "Amaun",
-                    value = 300
+                    value = 0
                 ),
                 textOutput("price"),
                 actionButton(
@@ -256,7 +256,7 @@ server <- function(input, output, session) {
         ))
     })
     
-    price <- output$price <- renderText({
+    price <- renderText({
         qry <- toJSON(list(item = input$input_item), auto_unbox = TRUE)
         colItem$find(qry, fields = '{"_id": 0, "price": 1}') %>% unlist()
         # colItem$find('{"item": input$input_item}', fields='{"_id":0,"price":1}') %>% unlist()
@@ -269,15 +269,11 @@ server <- function(input, output, session) {
     })
     
     observeEvent(input$input_item,{
-        price <- res$price
         # update variable
         updateNumericInput(session, "input_price", value = price())
     })
     
-    observeEvent(input$input_price,{
-        price <- res$price
-        # update variable
-        # updateNumericInput(session, "input_price", value = price())
+    observeEvent(c(input$input_unit, input$input_price),{
         updateNumericInput(session, "input_amaun", value = amount())
     })
 
