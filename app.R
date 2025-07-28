@@ -10,7 +10,7 @@ library(bs4Dash)
 library(DT)
 library(jsonlite)
 
-# read sales data
+# read sales data ----
 uri <- Sys.getenv("URI")
 colSales <- mongo(collection="sales", db="oa", url=uri)
 colItem <- mongo(collection="items", db="oa", url=uri)
@@ -98,9 +98,9 @@ ui <- dashboardPage(
                 numericInput(
                     inputId = "input_amaun",
                     label = "Amaun",
-                    value = 300
+                    value = 0
                 ),
-                # textOutput("price"), not run 
+                textOutput("price"),
                 actionButton(
                     inputId = "btn_trans",
                     "Terima!",
@@ -112,22 +112,13 @@ ui <- dashboardPage(
                 h1(
                     "Jadual Item"
                 ),
-                textInput(
-                    inputId = "input_name_item",
-                    label = "Nama produk"
-                ),
-                numericInput(
-                    inputId = "input_price_item",
-                    label = "Harga",
-                    value = 3
+                DTOutput(
+                    outputId = "out_items"
                 ),
                 actionButton(
-                    inputId = "btn_item",
+                    inputId = "btn_items",
                     "Terima!",
                     class = "btn-success"
-                ),
-                tableOutput(
-                    outputId = "out_items"
                 )
             ),
             tabItem(
@@ -256,7 +247,7 @@ server <- function(input, output, session) {
         ))
     })
     
-    price <- output$price <- renderText({
+    price <- renderText({
         qry <- toJSON(list(item = input$input_item), auto_unbox = TRUE)
         colItem$find(qry, fields = '{"_id": 0, "price": 1}') %>% unlist()
         # colItem$find('{"item": input$input_item}', fields='{"_id":0,"price":1}') %>% unlist()
@@ -269,35 +260,44 @@ server <- function(input, output, session) {
     })
     
     observeEvent(input$input_item,{
-        price <- res$price
         # update variable
         updateNumericInput(session, "input_price", value = price())
     })
     
-    observeEvent(input$input_price,{
-        price <- res$price
-        # update variable
-        # updateNumericInput(session, "input_price", value = price())
+    observeEvent(c(input$input_unit, input$input_price),{
         updateNumericInput(session, "input_amaun", value = amount())
     })
-
-    observeEvent(input$btn_item, {
-        tb <- tibble(item = input$input_name_item, price = input$input_price_item)
-        output$df <- renderTable({
-            tb
-        })
-
+    
+    data <- dplyr::as_tibble(colItem$find(fields = '{"_id": 0, "item": 1, "price": 1}')) # Fetch all documents
+    values <- reactiveValues(data = data)
+    
+    # Render the DataTable
+    output$out_items <- renderDT({
+        datatable(values$data, editable = list(target = 'cell', numeric = c(2)), rownames = FALSE)
+    })
+    
+    observeEvent(input$out_items_cell_edit, {
+        req(input$out_items_cell_edit)
+        info <- input$out_items_cell_edit
+        str(info)
+        i <- info$row
+        j <- info$col + 1
+        value <- info$value
+        
+        # Accessing and updating the reactive values
+        values$data[i, j] <- value
+        values$data <- values$data  # Trigger reactivity
+    })
+    observeEvent(input$btn_items, {
         # insert database
-        colItem$insert(tb)
+        # Get the edited data
+        edited_data <- values$data
+        colItem$drop()
+        colItem$insert(edited_data)
         showModal(modalDialog(
             title = "Notis",
             "Maklumat telah dikemaskini!"
         ))
-    })
-    
-    # Display Items collections
-    output$out_items <-  renderTable({
-        colItem$find('{}')
     })
     
     # Calculate total Sales - Exp
