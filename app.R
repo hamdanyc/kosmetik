@@ -381,16 +381,16 @@ server <- function(input, output, session) {
         })
     })
     
-    # View | Items transaction
+    # View | Items transaction ----
     observeEvent(input$slider_edtbln,{
+        pipe_list <- list(
+            list('$project' = list("_id" = 0, date = 1, type = 1, item = 1, unit = 1, amount = 1, mth = list('$month' = '$date'))),
+            list('$match' = list(mth = input$slider_edtbln))
+        )
+        pipe <- toJSON(pipe_list, auto_unbox = TRUE)
+ 
         output$tbitem <- DT::renderDataTable({
             # pipe <- '[{ $project: {_id: 0, date: 1, type: 1, amount: 1, mth: {$month: "$date" }}}, {$match:{ mth: 6}}]'
-            pipe_list <- list(
-                list('$project' = list("_id" = 0, date = 1, type = 1, item = 1, unit = 1, amount = 1, mth = list('$month' = '$date'))),
-                list('$match' = list(mth = input$slider_edtbln))
-            )
-            pipe <- toJSON(pipe_list, auto_unbox = TRUE)
-            
             # Query db with aggregate
             td <- colSales$aggregate(pipe = pipe)
             
@@ -403,6 +403,18 @@ server <- function(input, output, session) {
                 ))
             }
         })
+        
+        # aggregate value
+        output$tbitem_sum <- renderTable({
+            # df <- tibble("Sales" = 123, "Restock" = 34)
+            td <- colSales$aggregate(pipe = pipe)
+            
+            if (nrow(td) > 0 ){
+                td %>% group_by(type) %>% 
+                    summarise(Total = sum(amount))
+            }
+        })
+
     })
 }
 
