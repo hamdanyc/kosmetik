@@ -212,6 +212,7 @@ ui <- bs4DashSidebar(
 
 # server logic ----
 server <- function(input, output, session) {
+    # Transaksi Jualan ----
     observeEvent(input$btn_trans, {
         tb <- tibble(date = lubridate::as_datetime(format(input$input_tkh,"%Y-%m-%d")), 
                      type = input$input_type, item = input$input_item, unit = input$input_unit, 
@@ -253,7 +254,7 @@ server <- function(input, output, session) {
     data <- dplyr::as_tibble(colItem$find(fields = '{"_id": 0, "item": 1, "price": 1}')) # Fetch all documents
     values <- reactiveValues(data = data)
     
-    # Render the DataTable
+    # Jadual item ----
     output$out_items <- renderDT({
         datatable(values$data, editable = list(target = 'cell', numeric = c(2)), rownames = FALSE)
     })
@@ -270,6 +271,7 @@ server <- function(input, output, session) {
         values$data[i, j] <- value
         values$data <- values$data  # Trigger reactivity
     })
+    
     observeEvent(input$btn_items, {
         
         # Get the edited data
@@ -294,7 +296,8 @@ server <- function(input, output, session) {
                               easyClose = TRUE))
     })
     
-    # Calculate total Sales - Exp
+    # Aggregate values ----
+    ## annual Sales | exp ----
     df <- colSales$find('{}')
     total_sales <- df %>% 
         filter(type == "sales") %>% 
@@ -311,7 +314,7 @@ server <- function(input, output, session) {
     output$output_yr_net <- renderText(net_profit)
     output$output_yr_margin <- renderText(round(net_margin))
     
-    # monthly aggregate
+    ## monthly sale | exp ----
     observeEvent(input$slider_mth,{
         # pipe <- '[{ $project: {date: 1, type: 1, amount: 1, mth: {$month: "$date" }}}, {$match:{ mth: 6}}]'
         
@@ -349,7 +352,7 @@ server <- function(input, output, session) {
         }
     })
     
-    # View | edit transaction
+    # Verifikasi | Transaksi (Bulanan) (deprecated) ----
     observeEvent(input$slider_tbmth,{
         output$tbmth <- DT::renderDataTable({
             # pipe <- '[{ $project: {_id: 0, date: 1, type: 1, amount: 1, mth: {$month: "$date" }}}, {$match:{ mth: 6}}]'
@@ -379,12 +382,12 @@ server <- function(input, output, session) {
     })
     
     # View | Items transaction
-    observeEvent(input$slider_tbitem,{
+    observeEvent(input$slider_edtbln,{
         output$tbitem <- DT::renderDataTable({
             # pipe <- '[{ $project: {_id: 0, date: 1, type: 1, amount: 1, mth: {$month: "$date" }}}, {$match:{ mth: 6}}]'
             pipe_list <- list(
                 list('$project' = list("_id" = 0, date = 1, type = 1, item = 1, unit = 1, amount = 1, mth = list('$month' = '$date'))),
-                list('$match' = list(mth = input$slider_tbitem))
+                list('$match' = list(mth = input$slider_edtbln))
             )
             pipe <- toJSON(pipe_list, auto_unbox = TRUE)
             
@@ -392,7 +395,7 @@ server <- function(input, output, session) {
             td <- colSales$aggregate(pipe = pipe)
             
             if (nrow(td) > 0) {
-                datatable(td, rownames = FALSE, editable = FALSE)
+                datatable(td[,-6], rownames = FALSE, editable = FALSE)
             } else{
                 showModal(modalDialog(
                     title = "Maaf",
