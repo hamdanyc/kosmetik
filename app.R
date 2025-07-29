@@ -55,10 +55,6 @@ ui <- dashboardPage(
             menuItem(
                 text = "Verifikasi | Transaksi (Bulanan)",
                 tabName = "tab_edtbln"
-            ),
-            menuItem(
-                text = "Verifikasi | Item (Bulanan)",
-                tabName = "tab_itembln"
             )
         )
     ),
@@ -202,20 +198,6 @@ ui <- dashboardPage(
                     "Verifikasi | Transaksi (Bulanan)"
                 ),
                 sliderInput(
-                    inputId = "slider_tbmth",
-                    label = "Bulan",
-                    min = 0,
-                    max = 12,
-                    value = dm
-                ),
-                DT::dataTableOutput('tbmth')
-            ),
-            tabItem(
-                tabName = "tab_itembln",
-                h1(
-                    "Verifikasi | Item (Bulanan)"
-                ),
-                sliderInput(
                     inputId = "slider_tbitem",
                     label = "Bulan",
                     min = 0,
@@ -289,15 +271,27 @@ server <- function(input, output, session) {
         values$data <- values$data  # Trigger reactivity
     })
     observeEvent(input$btn_items, {
-        # insert database
+        
         # Get the edited data
         edited_data <- values$data
-        colItem$drop()
-        colItem$insert(edited_data)
-        showModal(modalDialog(
-            title = "Notis",
-            "Maklumat telah dikemaskini!"
-        ))
+
+        for (i in 1:nrow(edited_data)) {
+            row <- edited_data[i, ]
+            
+            # Construct the query
+            query <- toJSON(list(item = row$item), auto_unbox = TRUE)
+            update_data <- list(price = row$price)
+            
+            # Construct the update document
+            update <- paste0('{"$set": ', toJSON(update_data, auto_unbox = TRUE), '}')
+            
+            # Update the document
+            colItem$update(query, update)
+        }
+        
+        showModal(modalDialog(title = "Makluman","Item telah dikemaskini!",
+                              size = "s",
+                              easyClose = TRUE))
     })
     
     # Calculate total Sales - Exp
@@ -395,16 +389,10 @@ server <- function(input, output, session) {
             pipe <- toJSON(pipe_list, auto_unbox = TRUE)
             
             # Query db with aggregate
-            td <- colSales$aggregate(pipe = pipe) %>% 
-                select(date, type, item, unit, amount)
+            td <- colSales$aggregate(pipe = pipe)
             
             if (nrow(td) > 0) {
-                datatable(td, rownames = FALSE, editable = list(
-                    target = 'row', disable = list(columns = c(0,3))),
-                    options = list(dom = 'Bfrtip',
-                                   buttons = c('create', 'edit', 'remove'),
-                                   fixedHeader = TRUE
-                    ))
+                datatable(td, rownames = FALSE, editable = FALSE)
             } else{
                 showModal(modalDialog(
                     title = "Maaf",
