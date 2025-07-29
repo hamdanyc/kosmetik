@@ -29,7 +29,7 @@ price <- function(item){
 }
     
 # Define ui ----
-ui <- dashboardPage(
+ui <- bs4DashSidebar(
     title = "Shiny Application",
     dashboardHeader(
         title = "Wawa Roadmap"
